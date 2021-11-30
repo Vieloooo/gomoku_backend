@@ -36,11 +36,3 @@ func (message *MessageFromServer) encode() []byte {
 
 	return json
 }
-func (message *MessageFromUser) encode() []byte {
-	json, err := json.Marshal(message)
-	if err != nil {
-		log.Println(err)
-	}
-
-	return json
-}

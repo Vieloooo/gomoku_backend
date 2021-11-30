@@ -17,7 +17,7 @@ func main() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		ServeWs(wsServer, w, r)
 	})
-
+	println(addr)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 
 }

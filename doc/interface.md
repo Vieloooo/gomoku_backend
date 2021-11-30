@@ -10,9 +10,12 @@ user websocket protocol for c/s communication
 2. regular pingpong (use websocket default pingpong handler)
 3. user action
    1. join room
-   2. play the pawn
+   2. leave room
+   3. play the pawn
 4. server feedback
    1. return meta_info
+5. unexpected situation:
+   1. a client close connection(reset the )
 
 ## msg json design
 
@@ -38,14 +41,13 @@ type MessageFromUser struct {
 
 ```go
 type MessageFromServer struct {
-    RoomName string  `json:"roomName"`              //if roomname == null, no in room
-    Target  *Room   `json:"target"`                 //put in MessageFromUser.
-    Sender  *Client `json:"sender"`
-    Player   int32   `json:"player"`
-    Player1Online bool `json:"player1Online"`
-    Player2Online bool `json:"player2Online"`
-    Turn     int32   `json:"turn"`                  //0 not start, 1 player1's turn, 2 play2's turn
-    Board    string   `json:"board"`
+	RoomName      string    `json:"roomName"` //if roomname == null, no in room
+	Target        *Room     `json:"target"`   //put in MessageFromUser.
+	Sender        *Client   `json:"sender"`
+	Player        int32     `json:"player"`
+	Player1Online bool      `json:"player1Online"`
+	Player2Online bool      `json:"player2Online"`
+	Turn          int32     `json:"turn"` //0 not start, 1 player1's turn, 2 play2's turn
+	Board         [100]byte `json:"board"`
 }
-
 ```

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -26,6 +27,9 @@ const (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 type Client struct {
@@ -60,6 +64,11 @@ func (client *Client) readPump() {
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("unexpected close error: %v", err)
+			}
+			//del user and
+			client.wsServer.unregister <- client
+			if client.rooms != nil {
+				client.wsServer.delRoom <- client.rooms
 			}
 			break
 		}
@@ -109,15 +118,18 @@ func (client *Client) writePump() {
 	}
 }
 func (client *Client) disconnect() {
-	client.rooms.unregister <- client
+	if client.rooms != nil {
+		client.rooms.unregister <- client
+	}
 	client.wsServer.unregister <- client
 	close(client.send)
+	client.rooms = nil
 	client.conn.Close()
 }
 
 // ServeWs handles websocket requests from clients requests.
 func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
-
+	fmt.Println("get a ws con")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)

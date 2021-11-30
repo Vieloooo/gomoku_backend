@@ -45,6 +45,7 @@ func (server *WsServer) registerClient(client *Client) {
 
 func (server *WsServer) unregisterClient(client *Client) {
 	delete(server.clients, client)
+
 }
 
 func (server *WsServer) deleteRoom(room *Room) {

@@ -1,10 +1,15 @@
 package main
 
+import "time"
+
 type Pawn struct {
 	X      int32
 	Y      int32
 	client *Client
 }
+
+const boardcastTime = 500 * time.Millisecond
+
 type Room struct {
 	Name          string `json:"name"`
 	wsServer      *WsServer
@@ -42,6 +47,10 @@ func NewRoom(name string, ws *WsServer) *Room {
 
 // RunRoom runs our room, accepting various requests
 func (room *Room) RunRoom() {
+	ticker := time.NewTicker(boardcastTime)
+	defer func() {
+		ticker.Stop()
+	}()
 	for {
 		select {
 
@@ -54,6 +63,8 @@ func (room *Room) RunRoom() {
 			room.putPawn(p.X, p.Y, p.client)
 		case <-room.over:
 			return
+		case <-ticker.C:
+			room.updateInfo()
 		}
 
 	}
@@ -117,12 +128,14 @@ func (room *Room) unregisterClientInRoom(client *Client) {
 	if client == room.Client1 {
 		room.Turn = 0
 		room.Player1Online = false
+		room.resetBoard()
 		room.checkEnd()
 		return
 	}
 	if client == room.Client2 {
 		room.Turn = 0
 		room.Player2Online = false
+		room.resetBoard()
 		room.checkEnd()
 		return
 	}
