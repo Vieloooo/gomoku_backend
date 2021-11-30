@@ -7,6 +7,7 @@ import (
 
 const PlayPawn = "play-pawn"
 const JoinRoom = "join-room"
+const LeaveRoom = "leave-room"
 
 type MessageFromUser struct {
 	Action   string  `json:"action"`

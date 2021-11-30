@@ -143,12 +143,48 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 	message.Sender = client
 	switch message.Action {
 	case JoinRoom:
-		{
 
-		}
+		client.handleJoinRoom(message)
+	case LeaveRoom:
+		client.handleLeaveRoom(message)
 	case PlayPawn:
-		{
+		client.handlePlayPawn(message)
 
-		}
 	}
+}
+
+func (client *Client) handleJoinRoom(msg MessageFromUser) {
+	roomName := msg.RoomName
+	client.joinRoom(roomName)
+
+}
+func (client *Client) handleLeaveRoom(msg MessageFromUser) {
+	roomName := msg.RoomName
+	room := client.wsServer.findRoomByName(roomName)
+	if room == nil {
+		return
+	}
+	room.unregister <- client
+}
+func (client *Client) joinRoom(roomName string) {
+	room := client.wsServer.findRoomByName(roomName)
+	if room == nil {
+		room = client.wsServer.createRoom(roomName)
+	}
+	//client is not in any room
+	if client.rooms == nil {
+		client.rooms = room
+		room.register <- client
+	}
+}
+func (client *Client) handlePlayPawn(msg MessageFromUser) {
+	roomName := msg.RoomName
+	room := client.wsServer.findRoomByName(roomName)
+	p := Pawn{
+		X:      msg.X,
+		Y:      msg.Y,
+		client: client,
+	}
+	room.pawn <- &p
+
 }

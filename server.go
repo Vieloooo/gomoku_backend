@@ -4,7 +4,7 @@ type WsServer struct {
 	clients    map[*Client]bool
 	register   chan *Client
 	unregister chan *Client
-	broadcast  chan []byte
+	delRoom    chan *Room
 	rooms      map[*Room]bool
 }
 
@@ -14,7 +14,7 @@ func NewWebsocketServer() *WsServer {
 		clients:    make(map[*Client]bool),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		broadcast:  make(chan []byte),
+		delRoom:    make(chan *Room),
 		rooms:      make(map[*Room]bool),
 	}
 }
@@ -29,27 +29,26 @@ func (server *WsServer) Run() {
 
 		case client := <-server.unregister:
 			server.unregisterClient(client)
-		case message := <-server.broadcast:
-			server.broadcastToClients(message)
+		case r := <-server.delRoom:
+			server.deleteRoom(r)
 		}
-
 	}
 }
 
 func (server *WsServer) registerClient(client *Client) {
 	server.clients[client] = true
+	//send *Client back to user
+	var msg MessageFromServer
+	msg.Sender = client
+	client.send <- msg.encode()
 }
 
 func (server *WsServer) unregisterClient(client *Client) {
-	if _, ok := server.clients[client]; ok {
-		delete(server.clients, client)
-	}
+	delete(server.clients, client)
 }
 
-func (server *WsServer) broadcastToClients(message []byte) {
-	for client := range server.clients {
-		client.send <- message
-	}
+func (server *WsServer) deleteRoom(room *Room) {
+	delete(server.rooms, room)
 }
 
 func (server *WsServer) findRoomByName(name string) *Room {
@@ -64,8 +63,8 @@ func (server *WsServer) findRoomByName(name string) *Room {
 	return foundRoom
 }
 
-func (server *WsServer) createRoom(name string, private bool) *Room {
-	room := NewRoom(name)
+func (server *WsServer) createRoom(name string) *Room {
+	room := NewRoom(name, server)
 	go room.RunRoom()
 	server.rooms[room] = true
 
