@@ -20,12 +20,12 @@ user websocket protocol for c/s communication
 
 ```go
 type MessageFromUser struct {
-	Action  string  `json:"action"`
+	Action   string  `json:"action"`
 	RoomName string  `json:"message"`
-	Target  *Room   `json:"target"`
-	Sender  *Client `json:"sender"`
-    X       int32   `json:"x"`
-    Y       int32   `json:"y"`
+	Target   *Room   `json:"target"`
+	Sender   *Client `json:"sender"`
+	X        int32   `json:"x"`
+	Y        int32   `json:"y"`
 }
 ```
 

@@ -32,7 +32,6 @@ func (server *WsServer) Run() {
 		case message := <-server.broadcast:
 			server.broadcastToClients(message)
 		}
-		}
 
 	}
 }
@@ -46,8 +45,6 @@ func (server *WsServer) unregisterClient(client *Client) {
 		delete(server.clients, client)
 	}
 }
-
-
 
 func (server *WsServer) broadcastToClients(message []byte) {
 	for client := range server.clients {
@@ -67,34 +64,10 @@ func (server *WsServer) findRoomByName(name string) *Room {
 	return foundRoom
 }
 
-func (server *WsServer) findRoomByID(ID string) *Room {
-	var foundRoom *Room
-	for room := range server.rooms {
-		if room.ID == ID {
-			foundRoom = room
-			break
-		}
-	}
-
-	return foundRoom
-}
-
 func (server *WsServer) createRoom(name string, private bool) *Room {
-	room := NewRoom(name, private)
+	room := NewRoom(name)
 	go room.RunRoom()
 	server.rooms[room] = true
 
 	return room
-}
-
-func (server *WsServer) findClientByID(ID string) *Client {
-	var foundClient *Client
-	for client := range server.clients {
-		if client.ID.String() == ID {
-			foundClient = client
-			break
-		}
-	}
-
-	return foundClient
 }
