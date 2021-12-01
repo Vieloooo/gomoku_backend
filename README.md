@@ -38,3 +38,10 @@ ws://localhost:8080/ws
     "Y":4
 }
 ```
+
+## build instructure
+
+1. go installed
+2. go get gorilla/websocket
+3. go build ./
+4. now server will host on localhost:8080
