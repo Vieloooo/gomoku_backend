@@ -1,0 +1,18 @@
+//join room 
+{
+    "action":"join-room",
+    "message":"firstroom"
+}
+//leave room
+{
+    "action":"leave-room",
+    "message":"firstroom"
+}
+//play pawn 
+{
+    "action":"play-pawn",
+    "message":"firstroom",
+    "X":0,
+    "Y":4
+}
+

@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 type Pawn struct {
 	X      int32
@@ -20,7 +23,7 @@ type Room struct {
 	register      chan *Client
 	unregister    chan *Client
 	over          chan int
-	pawn          chan *Pawn
+	pawn          chan Pawn
 	Turn          int32     `json:"turn"`
 	Board         [100]byte `json:"board"`
 }
@@ -36,6 +39,7 @@ func NewRoom(name string, ws *WsServer) *Room {
 		wsServer:      ws,
 		register:      make(chan *Client),
 		unregister:    make(chan *Client),
+		pawn:          make(chan Pawn),
 		over:          make(chan int),
 		Turn:          0,
 		Player1Online: false,
@@ -73,19 +77,16 @@ func (room *Room) updateInfo() {
 
 	msg := MessageFromServer{
 		RoomName:      room.Name,
-		Target:        room,
 		Turn:          room.Turn,
 		Player1Online: room.Player1Online,
 		Player2Online: room.Player2Online,
 		Board:         room.Board,
 	}
 	if room.Player1Online {
-		msg.Sender = room.Client1
 		msg.Player = 1
 		room.Client1.send <- msg.encode()
 	}
 	if room.Player2Online {
-		msg.Sender = room.Client2
 		msg.Player = 2
 		room.Client2.send <- msg.encode()
 	}
@@ -98,6 +99,7 @@ func (room *Room) checkStart() {
 	}
 }
 func (room *Room) checkEnd() {
+	log.Println("check end, player1", room.Player1Online, "player2", room.Player2Online)
 	if !room.Player1Online && !room.Player2Online {
 		room.wsServer.delRoom <- room
 	}
@@ -142,15 +144,21 @@ func (room *Room) unregisterClientInRoom(client *Client) {
 }
 
 func (room *Room) putPawn(x, y int32, c *Client) {
+	log.Println("update pawn of room:", room.Name, x, y)
 	defer room.updateInfo()
 	if room.Player1Online && c == room.Client1 && room.Turn == 1 {
 		room.Turn = 2
-		room.Board[10*x+y] = '1'
+		if room.Board[10*x+y] == '0' {
+			room.Board[10*x+y] = '1'
+		}
+
 		return
 	}
 	if room.Player2Online && c == room.Client2 && room.Turn == 2 {
 		room.Turn = 1
-		room.Board[10*x+y] = '2'
+		if room.Board[10*x+y] == '0' {
+			room.Board[10*x+y] = '2'
+		}
 		return
 	}
 }

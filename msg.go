@@ -10,17 +10,13 @@ const JoinRoom = "join-room"
 const LeaveRoom = "leave-room"
 
 type MessageFromUser struct {
-	Action   string  `json:"action"`
-	RoomName string  `json:"message"`
-	Target   *Room   `json:"target"`
-	Sender   *Client `json:"sender"`
-	X        int32   `json:"x"`
-	Y        int32   `json:"y"`
+	Action   string `json:"action"`
+	RoomName string `json:"message"`
+	X        int32  `json:"x"`
+	Y        int32  `json:"y"`
 }
 type MessageFromServer struct {
 	RoomName      string    `json:"roomName"` //if roomname == null, no in room
-	Target        *Room     `json:"target"`   //put in MessageFromUser.
-	Sender        *Client   `json:"sender"`
 	Player        int32     `json:"player"`
 	Player1Online bool      `json:"player1Online"`
 	Player2Online bool      `json:"player2Online"`

@@ -1,5 +1,7 @@
 package main
 
+import "log"
+
 type WsServer struct {
 	clients    map[*Client]bool
 	register   chan *Client
@@ -39,16 +41,17 @@ func (server *WsServer) registerClient(client *Client) {
 	server.clients[client] = true
 	//send *Client back to user
 	var msg MessageFromServer
-	msg.Sender = client
+	msg.RoomName = ""
+	log.Println("register client ")
 	client.send <- msg.encode()
 }
 
 func (server *WsServer) unregisterClient(client *Client) {
 	delete(server.clients, client)
-
 }
 
 func (server *WsServer) deleteRoom(room *Room) {
+	log.Println("del room", room.Name)
 	delete(server.rooms, room)
 }
 

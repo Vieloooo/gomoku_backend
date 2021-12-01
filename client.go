@@ -152,7 +152,6 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 		return
 	}
 
-	message.Sender = client
 	switch message.Action {
 	case JoinRoom:
 
@@ -167,16 +166,31 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 
 func (client *Client) handleJoinRoom(msg MessageFromUser) {
 	roomName := msg.RoomName
+	log.Println("join room:", roomName)
 	client.joinRoom(roomName)
 
 }
 func (client *Client) handleLeaveRoom(msg MessageFromUser) {
 	roomName := msg.RoomName
+	log.Println("leave room in:", roomName)
 	room := client.wsServer.findRoomByName(roomName)
 	if room == nil {
 		return
 	}
 	room.unregister <- client
+
+	var amsg MessageFromServer
+	amsg.RoomName = ""
+	if client == client.rooms.Client1 {
+		amsg.RoomName = ""
+		amsg.Player = 0
+		amsg.Player1Online = false
+		amsg.Player2Online = false
+		amsg.Turn = 0
+	}
+
+	client.send <- amsg.encode()
+	client.rooms = nil
 }
 func (client *Client) joinRoom(roomName string) {
 	room := client.wsServer.findRoomByName(roomName)
@@ -191,12 +205,17 @@ func (client *Client) joinRoom(roomName string) {
 }
 func (client *Client) handlePlayPawn(msg MessageFromUser) {
 	roomName := msg.RoomName
+	log.Println("get a pawn", msg.X, msg.Y, roomName)
 	room := client.wsServer.findRoomByName(roomName)
+	if room == nil {
+		log.Println("play a pawn on nil room")
+	}
 	p := Pawn{
 		X:      msg.X,
 		Y:      msg.Y,
 		client: client,
 	}
-	room.pawn <- &p
+	log.Println("send pawn to room", p)
+	room.pawn <- p
 
 }
