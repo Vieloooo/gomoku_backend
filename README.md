@@ -4,6 +4,8 @@ a gomoku game backend written in golang
 
 ## connections
 
+> you can test on : https://www.xhcode.com/websocket/
+
 1. init connections
 
 ```
