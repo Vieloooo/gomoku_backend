@@ -66,11 +66,6 @@ func (client *Client) readPump() {
 				log.Printf("unexpected close error: %v", err)
 			}
 			log.Println("connection over")
-			//del user and
-			client.wsServer.unregister <- client
-			if client.rooms != nil {
-				client.rooms.unregister <- client
-			}
 			break
 		}
 

@@ -140,21 +140,27 @@ func (room *Room) resetBoard() {
 	}
 }
 func (room *Room) unregisterClientInRoom(client *Client) {
-	defer room.updateInfo()
+
 	if client == room.Client1 {
 		room.Turn = 0
 		room.Player1Online = false
 		room.resetBoard()
+		log.Println("player 1 check end")
 		room.checkEnd()
-		return
+
 	}
 	if client == room.Client2 {
 		room.Turn = 0
 		room.Player2Online = false
 		room.resetBoard()
+		log.Println("player 1 check end")
 		room.checkEnd()
-		return
+
 	}
+	if room.Player1Online || room.Player2Online {
+		room.updateInfo()
+	}
+
 }
 
 func (room *Room) putPawn(x, y int32, c *Client) {

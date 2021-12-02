@@ -1,8 +1,8 @@
 //join room 
-{
-    "action":"join-room",
-    "message":"firstroom"
-}
+    {
+        "action":"join-room",
+        "message":"firstroom"
+    }
 //leave room
 {
     "action":"leave-room",
