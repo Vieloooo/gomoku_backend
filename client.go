@@ -200,7 +200,10 @@ func (client *Client) joinRoom(roomName string) {
 	}
 	//client is not in any room
 	if client.rooms == nil {
-		client.rooms = room
+		//check if there are some space for new player
+		if !room.Player1Online || !room.Player2Online {
+			client.rooms = room
+		}
 		room.register <- client
 	}
 }
