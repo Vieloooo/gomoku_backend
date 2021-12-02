@@ -69,7 +69,7 @@ func (client *Client) readPump() {
 			//del user and
 			client.wsServer.unregister <- client
 			if client.rooms != nil {
-				client.wsServer.delRoom <- client.rooms
+				client.rooms.unregister <- client
 			}
 			break
 		}
