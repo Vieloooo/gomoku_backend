@@ -11,7 +11,7 @@ type Pawn struct {
 	client *Client
 }
 
-const boardcastTime = 500 * time.Millisecond
+const boardcastTime = 5000 * time.Millisecond
 
 type Room struct {
 	Name          string `json:"name"`
@@ -118,6 +118,20 @@ func (room *Room) registerClientInRoom(client *Client) {
 		room.checkStart()
 		return
 	}
+	//notify full
+	var b [100]byte
+	for i := 0; i < 100; i++ {
+		b[i] = '0'
+	}
+
+	aamsg := MessageFromServer{
+		RoomName:      "error",
+		Turn:          0,
+		Player1Online: false,
+		Player2Online: false,
+		Board:         b,
+	}
+	client.send <- aamsg.encode()
 
 }
 func (room *Room) resetBoard() {

@@ -65,6 +65,7 @@ func (client *Client) readPump() {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("unexpected close error: %v", err)
 			}
+			log.Println("connection over")
 			//del user and
 			client.wsServer.unregister <- client
 			if client.rooms != nil {
