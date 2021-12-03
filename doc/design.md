@@ -1,51 +1,53 @@
-# the implementation of GOMOKU
+## System structure
 
-## system structure
+In this project, we use simple b/s structure to support multi-pairs players playing at the same time
 
-### frontend:
+1. Frontend:
 
-### backend:
+2. Backend:
+    backend is written in golang using goruntine and channels to support concurrency. 
 
-backend is written in golang using multi-threads and channels to
+## C/S communication
 
-## c/s communication
+We use websocket protocol to build a steady channel between client and server
 
-we use websocket protocol to build steady channel between clients and server.
+1. message from user:
 
-### message from user
+    ```
+    //3 different actions: "play-pawn", "join-room", "leave-room"
+    Action   string `json:"action"`
+    RoomName string `json:"message"`
+    X        int32  `json:"x"`
+    Y        int32  `json:"y"`
+    ```
+    
+    Besides actions above, user can also disconnect the websocket connection without notifying server.
+    
+2. message from server
+    user can parse the json file in websocket connection to sync with other players
+    this structure bellow maintains the metadata of a gomoku Room
+    the 10-by-10 board is encoded in a single row 100 bytes array
 
-1. There are 3 different actions that a client can send.
+        RoomName      string    `json:"roomName"`
+        Player        int32     `json:"player"`
+        Player1Online bool      `json:"player1Online"`
+        Player2Online bool      `json:"player2Online"`
+        Turn          int32     `json:"turn"`
+        Board         [100]byte `json:"board"`
 
-```go
-const PlayPawn = "play-pawn"
-const JoinRoom = "join-room"
-const LeaveRoom = "leave-room"
 
-type MessageFromUser struct {
-	Action   string `json:"action"`
-	RoomName string `json:"message"`
-	X        int32  `json:"x"`
-	Y        int32  `json:"y"`
-}
-```
+## How to support multiple players concurrently
+We use 3 diffenrent kinds of threads to support multi-players in multi-rooms.
+1. server thread
+    1. handle http handleshake and upgrade its to websocket connection
+    2. maintain users' and rooms' registration
+2. client thread
+	 the client thread consists of 2 sub threads:
+	1. read thread: read data from user and send them to correct handler
+	2. write thread: send msg back to user
+3. room thread
+    room thread maintain the metaData of a gomoku game, including players' info, game info.
+    1. handle user join/leave room
+    2. handle user play a pawn in the room
 
-2. Besides actions above, user can also disconnect the websocket connection without notifying server.
-
-### message from server
-
-user can parse the json file in websocket connection to sync with other players
-this structure bellow maintains the metadata of a Room
-the 10-by-10 board is encoded in a single row 100 bytes array
-
-```go
-type MessageFromServer struct {
-	RoomName      string    `json:"roomName"`
-	Player        int32     `json:"player"`
-	Player1Online bool      `json:"player1Online"`
-	Player2Online bool      `json:"player2Online"`
-	Turn          int32     `json:"turn"`
-	Board         [100]byte `json:"board"`
-}
-```
-
-## how to support multiple players concurrently
+![](/home/vielo/Downloads/gomoku.drawio.png)
